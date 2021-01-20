@@ -12,6 +12,7 @@ class JokeList extends React.Component {
 		};
 		this.getJokes = this.getJokes.bind(this);
 		this.generateNewJokes = this.generateNewJokes.bind(this);
+		this.resetVotes = this.resetVotes.bind(this);
 		this.vote = this.vote.bind(this);
 	}
 
@@ -28,7 +29,8 @@ class JokeList extends React.Component {
 	async getJokes() {
 		let j = [...this.state.jokes];
 		let seenJokes = new Set();
-		if (JSON.parse(localStorage.getItem("jokes"))) {
+		let localJokes = JSON.parse(localStorage.getItem("jokes"));
+		if (localJokes.length > 0) {
 			this.setState({ jokes: JSON.parse(localStorage.getItem("jokes")) });
 			return;
 		}
@@ -55,8 +57,16 @@ class JokeList extends React.Component {
 	/* empty joke list and then call getJokes */
 
 	generateNewJokes() {
-		localStorage.removeItem("jokes");
+		localStorage.setItem("jokes", "[]");
 		this.setState({ jokes: [] });
+	}
+
+	resetVotes() {
+		const resettedJokes = this.state.jokes.map((j) =>
+			j.vote === 0 ? j : { ...j, votes: 0 }
+		);
+		this.setState({ jokes: resettedJokes });
+		localStorage.setItem("jokes", resettedJokes);
 	}
 
 	/* change vote for this id by delta (+1 or -1) */
@@ -77,6 +87,9 @@ class JokeList extends React.Component {
 				<div className="JokeList">
 					<button className="JokeList-getmore" onClick={this.generateNewJokes}>
 						Get New Jokes
+					</button>
+					<button className="JokeList-reset" onClick={this.resetVotes}>
+						Reset Votes
 					</button>
 
 					{sortedJokes.map((j) => (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import axios from "axios";
 import Joke from "./Joke";
 import "./JokeList.css";
@@ -17,15 +17,21 @@ class JokeList extends React.Component {
 
 	componentDidMount() {
 		if (this.state.jokes.length === 0) this.getJokes();
+		localStorage.setItem("jokes", JSON.stringify(this.state.jokes));
 	}
 	componentDidUpdate() {
 		if (this.state.jokes.length === 0) this.getJokes();
+		localStorage.setItem("jokes", JSON.stringify(this.state.jokes));
 	}
 	/* get jokes if there are no jokes */
 
 	async getJokes() {
 		let j = [...this.state.jokes];
 		let seenJokes = new Set();
+		if (JSON.parse(localStorage.getItem("jokes"))) {
+			this.setState({ jokes: JSON.parse(localStorage.getItem("jokes")) });
+			return;
+		}
 		try {
 			while (j.length < this.props.numJokesToGet) {
 				let res = await axios.get("https://icanhazdadjoke.com", {
@@ -49,6 +55,7 @@ class JokeList extends React.Component {
 	/* empty joke list and then call getJokes */
 
 	generateNewJokes() {
+		localStorage.removeItem("jokes");
 		this.setState({ jokes: [] });
 	}
 
